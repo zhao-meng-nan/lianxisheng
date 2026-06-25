@@ -1,0 +1,303 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>哈弗币汇率计算器 - 三角形行动</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0f1923;--surface:#1a2a3a;--surface2:#243447;--border:#2d4052;--text:#e8edf0;--text-secondary:#8899aa;--accent:#f5c518;--coin:#f5c518;--cny:#00b894;--shadow:0 4px 20px rgba(0,0,0,.3);--radius:10px}
+html{font-size:16px}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);display:flex;justify-content:center;align-items:flex-start;min-height:100vh;line-height:1.5;padding:24px 16px}
+.app{width:100%;max-width:460px}
+.header{text-align:center;margin-bottom:20px}
+.header h1{font-size:1.3rem;font-weight:700}
+.header .sub{font-size:.8rem;color:var(--text-secondary);margin-top:4px}
+.card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;margin-bottom:12px}
+.sec-title{font-size:.75rem;font-weight:600;color:var(--text-secondary);margin-bottom:14px;letter-spacing:.05em}
+.stat-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.stat-row:last-child{margin-bottom:0}
+.stat-label{min-width:52px;font-size:.85rem;font-weight:500}
+.stat-bar-wrap{flex:1;min-width:100px;position:relative}
+.stat-bar-bg{height:8px;background:var(--surface2);border-radius:4px;position:relative;overflow:hidden;cursor:pointer}
+.stat-bar-fill{height:100%;border-radius:4px;transition:width .15s}
+.sf-stamina{background:linear-gradient(90deg,#00b894,#00cec9)}
+.sf-load{background:linear-gradient(90deg,#e17055,#fab1a0)}
+.stat-select{width:64px;padding:6px 4px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);font-size:.9rem;font-family:inherit;color:var(--text);outline:none;cursor:pointer;appearance:auto;text-align:center}
+.stat-select:focus{border-color:var(--accent)}
+.stat-dots{display:flex;justify-content:space-between;position:absolute;top:0;left:0;right:0;height:100%;pointer-events:none}
+.stat-dot{width:14px;height:8px;border-radius:1px}
+.stat-dot.filled.s-stamina{background:#00b894}
+.stat-dot.filled.s-load{background:#e17055}
+.f-box{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 16px;text-align:center;margin-bottom:16px}
+.f-box .fl{font-size:.7rem;color:var(--text-secondary);margin-bottom:4px}
+.f-box .fv{font-size:1.5rem;font-weight:700;color:var(--accent)}
+.f-box .fs{font-size:.75rem;color:var(--text-secondary);margin-top:4px;word-break:break-all}
+.rate-card{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:16px}
+.rate-side{text-align:center}
+.rate-side .rl{font-size:.7rem;color:var(--text-secondary);margin-bottom:2px}
+.rate-side .rv{font-size:1.2rem;font-weight:700}
+.rate-side .rv.coin{color:var(--coin)}
+.rate-side .rv.cny{color:var(--cny)}
+.rate-arrow{font-size:1.2rem;color:var(--text-secondary)}
+.conv-row{display:flex;gap:10px;margin-bottom:10px}
+.conv-field{flex:1}
+.conv-field label{display:block;font-size:.75rem;color:var(--text-secondary);margin-bottom:4px}
+.conv-field input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);font-size:.95rem;font-family:inherit;color:var(--text);outline:none}
+.conv-field input:focus{border-color:var(--accent)}
+.rbox{background:linear-gradient(135deg,#1a2a3a,#243447);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center}
+.rbox .rl{font-size:.7rem;color:var(--text-secondary)}
+.rbox .rb{font-size:1.8rem;font-weight:700;margin:4px 0}
+.rbox .rb.coin{color:var(--coin)}
+.rbox .rb.cny{color:var(--cny)}
+.rbox .rs{font-size:.8rem;color:var(--text-secondary)}
+.cbar{display:flex;justify-content:space-between;padding:8px 0 0;font-size:.75rem;color:var(--text-secondary);border-top:1px solid var(--border);margin-top:12px}
+.cbar .cv{color:#e74c3c;font-weight:600}
+.cbar .cr{color:var(--cny);font-weight:600}
+.quick-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
+.quick-btn{padding:10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:.85rem;cursor:pointer;font-family:inherit;text-align:center}
+.quick-btn:hover{border-color:var(--accent);background:rgba(245,197,24,.08)}
+.quick-btn .qs{font-size:.65rem;color:var(--text-secondary);margin-top:2px}
+.footer{text-align:center;margin-top:20px;font-size:.7rem;color:var(--text-secondary)}
+@media(max-width:400px){
+  .quick-grid{grid-template-columns:1fr}
+  .rate-card{grid-template-columns:1fr}
+  .rate-arrow{transform:rotate(90deg)}
+  .rbox .rb{font-size:1.5rem}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="header">
+  <h1>🔺 哈弗币汇率计算器</h1>
+  <div class="sub">三角形行动 · 格数(保险) · 体力 · 负重</div>
+</div>
+
+<div class="card">
+  <div class="sec-title">角色属性</div>
+
+  <div class="stat-row">
+    <div class="stat-label">🛡格数(保险)</div>
+    <select class="stat-select" id="sel-insurance">
+      <option value="2">2</option>
+      <option value="4">4</option>
+      <option value="6">6</option>
+      <option value="9" selected>9</option>
+    </select>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-label">⚡体力</div>
+    <div class="stat-bar-wrap">
+      <div class="stat-bar-bg" id="bar-stamina">
+        <div class="stat-bar-fill sf-stamina" style="width:100%"></div>
+        <div class="stat-dots" id="dots-stamina"></div>
+      </div>
+    </div>
+    <select class="stat-select" id="sel-stamina">
+      <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+      <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+      <option value="7" selected>7</option>
+    </select>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-label">🎒负重</div>
+    <div class="stat-bar-wrap">
+      <div class="stat-bar-bg" id="bar-load">
+        <div class="stat-bar-fill sf-load" style="width:100%"></div>
+        <div class="stat-dots" id="dots-load"></div>
+      </div>
+    </div>
+    <select class="stat-select" id="sel-load">
+      <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+      <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+      <option value="7" selected>7</option>
+    </select>
+  </div>
+
+  <div class="f-box">
+    <div class="fl">汇率</div>
+    <div class="fv" id="f-result">1:37</div>
+    <div class="fs" id="f-detail">基础37 ← 9格 → 体+0 → 负+0 = 37 万/元</div>
+  </div>
+
+  <div class="rate-card">
+    <div class="rate-side">
+      <div class="rl">汇率</div>
+      <div class="rv coin" id="rate-per-yuan">1:37</div>
+      <div class="rl">元 : 万</div>
+    </div>
+    <div class="rate-arrow">⇄</div>
+    <div class="rate-side">
+      <div class="rl">1m 哈弗币</div>
+      <div class="rv cny" id="rate-per-wan">2.70</div>
+      <div class="rl">元</div>
+    </div>
+  </div>
+
+  <div class="conv-row">
+    <div class="conv-field">
+      <label>哈弗币 (m)</label>
+      <input type="number" id="coin-input" step="any" value="100">
+    </div>
+    <div class="conv-field">
+      <label>人民币 (元)</label>
+      <input type="number" id="cny-input" step="any" value="">
+    </div>
+  </div>
+
+  <div class="rbox">
+    <div class="rl">兑换结果</div>
+    <div class="rb coin" id="result-val">100m</div>
+    <div class="rs" id="result-sub">哈弗币 → 人民币</div>
+    <div class="cbar">
+      <span>佣金 <span class="cv" id="comm-eff">10%</span></span>
+      <span>到手 <span class="cr" id="comm-real">¥0.00</span></span>
+    </div>
+  </div>
+</div>
+
+<div class="quick-grid">
+  <button class="quick-btn" data-g="9" data-s="7" data-l="7">9格 满体满负 <span class="qs">1:37</span></button>
+  <button class="quick-btn" data-g="9" data-s="5" data-l="5">9格 5体5负 <span class="qs">1:41</span></button>
+  <button class="quick-btn" data-g="6" data-s="7" data-l="7">6格 满体满负 <span class="qs">1:39</span></button>
+  <button class="quick-btn" data-g="6" data-s="5" data-l="5">6格 5体5负 <span class="qs">1:43</span></button>
+  <button class="quick-btn" data-g="4" data-s="7" data-l="7">4格 满体满负 <span class="qs">1:42</span></button>
+  <button class="quick-btn" data-g="4" data-s="5" data-l="5">4格 5体5负 <span class="qs">1:46</span></button>
+</div>
+
+<details class="card" style="padding:14px 20px;cursor:pointer">
+  <summary style="font-size:.85rem;color:var(--text-secondary);cursor:pointer;user-select:none">⚙ 设置</summary>
+  <div style="margin-top:14px">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <label style="font-size:.8rem;color:var(--text-secondary)">佣金</label>
+      <input type="number" id="cfg-comm" step="0.5" value="10" min="0" max="100" style="width:70px;padding:7px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);font-size:.85rem;font-family:inherit;color:var(--text);outline:none">
+      <span style="font-size:.7rem;color:var(--text-secondary)">%</span>
+    </div>
+    <div style="font-size:.7rem;color:var(--text-secondary);margin-top:8px">格数(保险)决定基础汇率，体力负重依次递减</div>
+  </div>
+</details>
+
+<div class="footer">格数=保险 · 体力1~7 · 负重1~7 · 仅供参考</div>
+</div>
+
+<script>
+var st={stamina:7,load:7,insurance:9};
+var cfg={comm:10};
+
+function gridBase(g){
+  var t={9:37,6:39,4:42,2:46};
+  return t[g]||46;
+}
+
+function getRatio(){
+  return gridBase(st.insurance)+(7-st.stamina)+(7-st.load);
+}
+
+// Init stamina/load dots
+['stamina','load'].forEach(function(k){
+  var c=document.getElementById('dots-'+k);
+  for(var i=1;i<=7;i++){var d=document.createElement('div');d.className='stat-dot';c.appendChild(d)}
+});
+
+function setStat(k,v){
+  st[k]=v;
+  if(k!=='insurance'){
+    document.getElementById('sel-'+k).value=v;
+    document.querySelector('#bar-'+k+' .stat-bar-fill').style.width=((v-1)/6*100)+'%';
+    document.querySelectorAll('#dots-'+k+' .stat-dot').forEach(function(d,i){d.className='stat-dot'+(i<v?' filled s-'+k:'')});
+  }else{
+    document.getElementById('sel-'+k).value=v;
+  }
+  calc();
+}
+
+// Bar clicks for stamina/load
+['stamina','load'].forEach(function(k){
+  document.getElementById('bar-'+k).addEventListener('click',function(e){
+    var r=this.getBoundingClientRect();
+    var v=Math.max(1,Math.min(7,Math.round(1+(e.clientX-r.left)/r.width*6)));
+    setStat(k,v);
+  });
+});
+
+// Select changes
+['stamina','load','insurance'].forEach(function(k){
+  document.getElementById('sel-'+k).addEventListener('change',function(){
+    setStat(k,parseInt(this.value));
+  });
+});
+
+function fmtCoin(n){
+  if(n>=100000000)return (n/100000000).toFixed(2)+'亿';
+  if(n>=1000000)return (n/1000000).toFixed(2)+'m';
+  return n.toLocaleString();
+}
+
+function calc(){
+  var ratio=getRatio();
+  var cr=cfg.comm||10;
+  var base=gridBase(st.insurance);
+  var afterSta=base+(7-st.stamina);
+  var afterLoad=afterSta+(7-st.load);
+  var sd=7-st.stamina>0?'+'+Math.abs(7-st.stamina):7-st.stamina<0?''+(7-st.stamina):'';
+  var ld=7-st.load>0?'+'+Math.abs(7-st.load):7-st.load<0?''+(7-st.load):'';
+
+  document.getElementById('f-detail').textContent='基础'+base+' ← '+st.insurance+'格 → 体'+sd+' → 负'+ld+' = '+ratio+' 万/元';
+  document.getElementById('f-result').textContent='1:'+ratio;
+  document.getElementById('rate-per-yuan').textContent='1:'+ratio;
+  document.getElementById('rate-per-wan').textContent=(10000/(ratio*10000)*10000).toFixed(2);
+  document.getElementById('comm-eff').textContent=cr+'%';
+
+  var cv=document.getElementById('coin-input').value;
+  var cnv=document.getElementById('cny-input').value;
+  if(cv&&!cnv)calcCV(cv,cr);else if(cnv&&!cv)calcCN(cnv,cr);else if(cv)calcCV(cv,cr);else clr();
+}
+
+function calcCV(v,cr){
+  var n=parseFloat(v);
+  if(!v||isNaN(n)||n<=0){clr();return}
+  var ratio=getRatio();
+  var raw=n*1000000/(ratio*10000);
+  var net=raw*(1-cr/100);
+  var ms=n>=1000?(n/1000).toFixed(2)+'亿':n.toFixed(2)+'m';
+  document.getElementById('result-val').className='rb cny';
+  document.getElementById('result-val').textContent='¥'+raw.toFixed(2);
+  document.getElementById('result-sub').textContent=ms+' 哈弗币';
+  document.getElementById('comm-real').textContent='¥'+net.toFixed(2);
+}
+
+function calcCN(v,cr){
+  var n=parseFloat(v);
+  if(!v||isNaN(n)||n<=0){clr();return}
+  var ratio=getRatio();
+  var net=Math.floor(n*ratio*10000*(1-cr/100));
+  document.getElementById('result-val').className='rb coin';
+  document.getElementById('result-val').textContent=fmtCoin(net);
+  document.getElementById('result-sub').textContent='¥'+n.toFixed(2)+' 人民币';
+  document.getElementById('comm-real').textContent=fmtCoin(net)+' 哈弗币';
+}
+
+function clr(){
+  document.getElementById('result-val').textContent='—';
+  document.getElementById('result-sub').textContent='请输入数值';
+  document.getElementById('comm-real').textContent='¥0.00';
+}
+
+document.getElementById('coin-input').addEventListener('input',function(){document.getElementById('cny-input').value='';calc();});
+document.getElementById('cny-input').addEventListener('input',function(){document.getElementById('coin-input').value='';calc();});
+document.getElementById('cfg-comm').addEventListener('input',function(){cfg.comm=parseFloat(this.value)||0;calc();});
+document.querySelectorAll('.quick-btn').forEach(function(b){
+  b.addEventListener('click',function(){
+    setStat('insurance',parseInt(this.dataset.g));
+    setStat('stamina',parseInt(this.dataset.s));
+    setStat('load',parseInt(this.dataset.l));
+  });
+});
+
+setStat('insurance',9);setStat('stamina',7);setStat('load',7);
+</script>
+</body>
+</html>
