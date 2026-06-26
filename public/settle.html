@@ -1,0 +1,225 @@
+﻿<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>零星商行 · 号主结算</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0f1923;--s:#1a2a3a;--s2:#243447;--b:#2d4052;--t:#e8edf0;--t2:#8899aa;--accent:#f5c518;--r:8px}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--t);padding:16px}
+.app{max-width:1200px;margin:0 auto}
+.hd{text-align:center;margin:0 0 12px}
+.hd h1{font-size:1.3rem;color:var(--accent)}
+.hd .s{font-size:.75rem;color:var(--t2);margin-top:2px}
+.mt{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.mt button{padding:4px 14px;border:1px solid var(--b);border-radius:6px;background:transparent;color:var(--t2);font-size:.75rem;cursor:pointer;font-family:inherit}
+.mt button.on{background:var(--accent);color:#1a1a2e;font-weight:600;border-color:var(--accent)}
+.mt .ml{font-size:.72rem;color:var(--t2);margin-left:6px}
+.ob{display:none;gap:6px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.ob.on{display:flex}
+.ob input{padding:6px 10px;border:1px solid var(--b);border-radius:6px;background:var(--s2);font-size:.82rem;color:var(--t);outline:none;font-family:inherit;min-width:140px;flex:1}
+.ob input:focus{border-color:var(--accent)}
+.st{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.st>div{background:var(--s);border-radius:var(--r);padding:12px;text-align:center}
+.st .n{font-size:1.4rem;font-weight:700}
+.st .l{font-size:.65rem;color:var(--t2);margin-top:2px}
+.c1 .n{color:var(--accent)}.c2 .n{color:var(--green)}.c3 .n{color:var(--t2)}.c4 .n{color:#74b9ff}
+.tb{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.btn{padding:8px 16px;border:none;border-radius:6px;font-size:.85rem;cursor:pointer;font-family:inherit}
+.bp{background:var(--accent);color:#1a1a2e;font-weight:600}
+.bp:hover{opacity:.85}
+.b2{background:transparent;border:1px solid var(--b);color:var(--t);padding:4px 8px;font-size:.75rem;border-radius:4px;cursor:pointer}
+.b3{background:transparent;border:1px solid #e74c3c;color:#e74c3c;padding:4px 8px;font-size:.75rem;border-radius:4px;cursor:pointer}
+table{width:100%;border-collapse:collapse;background:var(--s);border-radius:var(--r);overflow:hidden;font-size:.74rem}
+th{background:var(--s2);padding:5px 3px;text-align:left;font-weight:600;color:var(--t2);font-size:.64rem;white-space:nowrap}
+td{padding:5px 3px;border-top:1px solid var(--b)}
+.sb{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.66rem;font-weight:600}
+.sw{background:rgba(245,197,24,.15);color:var(--accent)}
+.sd{background:rgba(0,184,148,.15);color:var(--green)}
+.m{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);z-index:999;justify-content:center;align-items:center}
+.m.on{display:flex}
+.mb{background:var(--s);border-radius:var(--r);padding:20px;width:90%;max-width:580px;max-height:90vh;overflow-y:auto}
+.mb h2{font-size:1.05rem;margin-bottom:14px;color:var(--accent)}
+.f{margin-bottom:10px}
+.f label{display:block;font-size:.75rem;color:var(--t2);margin-bottom:3px}
+.f input,.f select,.f textarea{width:100%;padding:7px 10px;border:1px solid var(--b);border-radius:6px;background:var(--s2);font-size:.82rem;font-family:inherit;color:var(--t);outline:none}
+.f input:focus,.f select:focus,.f textarea:focus{border-color:var(--accent)}
+.f textarea{resize:vertical;min-height:34px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.fa{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+</style></head><body>
+<div class="app">
+<div class="hd"><h1>零星商行 · 号主结算</h1><div class="s">出币费+物资费=自动算总金额</div></div>
+<div class="mt">
+<button id="m1" class="on" onclick="setM('admin')">🔓 管理</button>
+<button id="m2" onclick="setM('owner')">🔒 号主</button>
+<span class="ml" id="ml">管理模式</span></div>
+<div class="ob" id="ob">
+<span style="font-size:.78rem;color:var(--t2)">👤 号主支付宝</span>
+<input id="oi" placeholder="输入你的支付宝账号查看记录">
+<button class="btn bp" onclick="ol()">查看</button></div>
+<div class="st" id="st"></div>
+<div class="tb">
+<button class="btn bp" onclick="ad()">➕ 新增</button>
+<button class="btn bp ad2" onclick="ex()">🏦 导出支付宝付款</button></div>
+<table class="ad2"><thead><tr>
+<th>#</th><th>日期</th><th>号主</th><th>群编号</th><th>打完</th><th>比例</th><th>出币M</th><th>出币费</th>
+<th>AW</th><th>红蛋</th><th>六甲/头</th><th>红甲修</th><th>红头修</th><th>金包</th><th>体验卡</th><th>大红包</th><th>物资费</th><th>总金额</th><th>状态</th><th class="ad2">操作</th>
+</tr></thead><tbody id="tb"></tbody></table>
+</div>
+<div class="m" id="modal"><div class="mb">
+<h2 id="mt">新增号主结算</h2>
+<div class="f"><label>打手是否已确认打完</label><select id="f1"><option value="是">✅ 是</option><option value="否">❌ 否</option></select></div>
+<div class="f"><label>支付宝账号 *</label><input id="f2"></div>
+<div class="f"><label>支付宝真实姓名 *</label><input id="f3"></div>
+<div class="f"><label>和打手的群编号 *</label><input id="f4"></div>
+<div class="g2"><div class="f"><label>登记日期</label><input id="fd" type="date" readonly tabindex="-1" style="color:var(--accent)"></div><div class="f"><label>时间段</label><input id="ft" value="10:00~21:00" readonly style="color:var(--accent)"></div></div>
+<div style="border:1px solid var(--b);border-radius:var(--r);padding:10px;margin-bottom:10px">
+<div style="font-size:.78rem;color:var(--accent);font-weight:600;margin-bottom:6px">💰 出币费用</div>
+<div class="g2"><div class="f"><label>比例（如37）</label><input id="fr" type="number" value="37" oninput="c()"></div><div class="f"><label>出租M数</label><input id="fn" type="number" value="100" oninput="c()"></div></div>
+<div style="text-align:right;font-size:.85rem;color:var(--accent)">出币费≈¥<span id="co">0.00</span><span style="font-size:.65rem;color:var(--t2);margin-left:6px">汇率<span id="rs">1:37</span>·佣金10%</span></div></div>
+<div style="border:1px solid var(--b);border-radius:var(--r);padding:10px;margin-bottom:10px">
+<div style="font-size:.78rem;color:var(--accent);font-weight:600;margin-bottom:6px">📦 物资费用</div>
+<div class="g2">
+<div class="f"><label>AW(0.6元/发)</label><input id="faw" class="it" type="number" value="0" oninput="m()"></div>
+<div class="f"><label>红蛋(7元/60发)</label><input id="fhd" class="it" type="number" value="0" oninput="m()"></div>
+<div class="f"><label>六甲(1.5元)</label><input id="flj" class="it" type="number" value="0" oninput="m()"></div>
+<div class="f"><label>六头(1.5元)</label><input id="flt" class="it" type="number" value="0" oninput="m()"></div>
+<div class="f"><label>红甲修(1元)</label><input id="fhjx" class="it" type="number" value="0" oninput="m()"></div>
+<div class="f"><label>红头修(0.5元)</label><input id="fhtx" class="it" type="number" value="0" oninput="m()"></div>
+<div class="f"><label>金色全装包(4元)</label><input id="fqzb" class="it" type="number" value="0" oninput="m()"></div>
+<div class="f"><label>九格体验卡(3元/天)</label><input id="ftyk" class="it" type="number" value="0" oninput="m()"></div>
+<div class="f" style="grid-column:span 2"><label>45格大红包(1元)</label><input id="fdhb" class="it" type="number" value="0" oninput="m()"></div></div>
+<div style="text-align:right;font-size:.85rem;color:var(--accent)">物资费=¥<span id="io">0.00</span></div></div>
+<div style="text-align:right;padding:6px 0;font-size:1rem;font-weight:700;color:var(--accent);border-top:2px solid var(--accent);margin-bottom:10px">总计=¥<span id="to">0.00</span></div>
+<div class="f"><label>有没有装备损失（额外记）</label><textarea id="fls"></textarea></div>
+<div class="fa"><button class="btn b2" onclick="hm()">取消</button><button class="btn bp" id="fbtn" onclick="sv()">确认添加</button></div>
+</div></div>
+
+<script>
+function db(){try{var d=localStorage.getItem('h9');return d?JSON.parse(d):[]}catch(e){return[]}}
+function sv2(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+var D=db();['h9','h8','h7','h6','h5','h4','h3','h2','hz3','hz2','settle2','hz_settle'].forEach(function(k){try{var d=JSON.parse(localStorage.getItem(k));if(d&&d.length){d.forEach(function(x){if(!D.find(function(y){return y.id===x.id}))D.push(x)})}}catch(e){}});if(D.length)sv2('h9',D);
+var EI=null,NI=D.length?D.reduce(function(m,x){return Math.max(m,x.id||0)},0)+1:1;
+var MD='admin',OW='';
+var P={aw:.6,hd:7/60,lj:1.5,lt:1.5,hjx:1,htx:.5,qzb:4,tyk:3,dhb:1};
+
+function setM(m){
+  if(m==='admin'&&MD!=='admin'){var p=prompt('输入管理密码');if(p!=='zhaocaihua'){alert('密码错误');return}}
+  MD=m;
+  document.getElementById('ml').textContent=m==='admin'?'管理模式':'号主模式';
+  document.getElementById('m1').className=m==='admin'?'on':'';
+  document.getElementById('m2').className=m==='owner'?'on':'';
+  document.getElementById('ob').className='ob'+(m==='owner'?' on':'');
+  document.querySelectorAll('.ad2').forEach(function(e){e.style.display=m==='admin'?'':'none'});
+  rd();
+}
+
+function ol(){
+  var el=document.getElementById('oi');if(!el){alert('页面元素异常');return}var v=el.value.trim();
+  if(!v){alert('请输入支付宝账号');return}
+  OW=v;setM('owner');
+  document.getElementById('ml').textContent='号主：'+v;rd();
+  var c=D.filter(function(x){return x.a===v&&!x.ref}).length;
+  if(!c)alert('没有「'+v+'」的记录');
+}
+
+function c(){var r=parseFloat(document.getElementById('fr').value)||37;var n=parseFloat(document.getElementById('fn').value)||0;var v=n*1e6/(r*1e4)*.9;document.getElementById('rs').textContent='1:'+r;document.getElementById('co').textContent=v.toFixed(2);t()}
+function m(){var s=0;document.querySelectorAll('.it').forEach(function(e){s+=(parseFloat(e.value)||0)*(P[e.id.replace('f','')]||0)});document.getElementById('io').textContent=s.toFixed(2);t()}
+function t(){var a=parseFloat(document.getElementById('co').textContent)||0,b=parseFloat(document.getElementById('io').textContent)||0;document.getElementById('to').textContent=(a+b).toFixed(2)}
+
+function ad(){
+  EI=null;var n=new Date();if(n.getHours()>=21)n.setDate(n.getDate()+1);
+  document.getElementById('fd').value=n.toISOString().slice(0,10);
+  document.getElementById('mt').textContent='新增号主结算';document.getElementById('fbtn').textContent='确认添加';
+  ['f1','f2','f3','f4','fr','fn','fls'].forEach(function(k){var el=document.getElementById(k);if(!el)return;if(k==='f1')el.value='是';else if(k==='fr')el.value='37';else if(k==='fn')el.value='100';else if(k==='f2'&&OW)el.value=OW;else el.value=''});
+  document.querySelectorAll('.it').forEach(function(el){el.value='0'});c();m();document.getElementById('modal').classList.add('on');
+}
+
+function ed(id){
+  var x=D.find(function(v){return v.id===id});if(!x)return;EI=id;
+  document.getElementById('mt').textContent='编辑 #'+id;document.getElementById('fbtn').textContent='保存';
+  document.getElementById('f1').value=x.d;document.getElementById('f2').value=x.a;document.getElementById('f3').value=x.n;
+  document.getElementById('f4').value=x.g;document.getElementById('fd').value=x.dt||'';
+  document.getElementById('fr').value=x.rt||'37';document.getElementById('fn').value=x.rn||'';
+  var it=x.i||{};document.querySelectorAll('.it').forEach(function(e){e.value=it[e.id.replace('f','')]||'0'});
+  document.getElementById('fls').value=x.ls||'';c();m();document.getElementById('modal').classList.add('on');
+}
+
+function hm(){document.getElementById('modal').classList.remove('on')}
+
+function sv(){
+  var d=document.getElementById('f1').value,a=document.getElementById('f2').value.trim(),n=document.getElementById('f3').value.trim(),g=document.getElementById('f4').value.trim();
+  if(!a||!n||!g){alert('填写支付宝、姓名和群编号');return}
+  var dt=document.getElementById('fd').value,rt=document.getElementById('fr').value,rn=document.getElementById('fn').value;
+  var co=parseFloat(document.getElementById('co').textContent)||0,im=parseFloat(document.getElementById('io').textContent)||0,t=co+im;
+  var it={};document.querySelectorAll('.it').forEach(function(e){it[e.id.replace('f','')]=e.value});
+  var ls=document.getElementById('fls').value.trim();
+  if(EI){var x=D.find(function(v){return v.id===EI});if(x){x.d=d;x.a=a;x.n=n;x.g=g;x.dt=dt;x.rt=rt;x.rn=rn;x.co=co;x.im=im;x.t=t;x.i=it;x.ls=ls}}
+  else{var nid=NI++;D.push({id:nid,d,a,n,g,dt,rt,rn,co,im,t,i:it,ls,time:new Date().toLocaleString()});D.push({id:NI++,d:'是',a:a,n:n,g:g,dt:dt,rt:0,rn:0,co:0,im:0,t:5,i:{},ls:'',ref:true,pid:nid,time:new Date().toLocaleString()})}
+  hm();rd();
+}
+
+function rd(){
+  var list=MD==='admin'?D:D.filter(function(x){return x.a===OW&&!x.ref});
+  var t=list.length,o=list.filter(function(x){return x.d==='是'}).length,p=t-o,s=list.reduce(function(z,x){return z+(parseFloat(x.t)||0)},0);
+  document.getElementById('st').innerHTML='<div class="c1"><div class="n">'+t+'</div><div class="l">记录</div></div><div class="c2"><div class="n">'+o+'</div><div class="l">已结算</div></div><div class="c3"><div class="n">'+p+'</div><div class="l">待结算</div></div><div class="c4"><div class="n">¥'+s.toFixed(0)+'</div><div class="l">总金额</div></div>';
+  var h='';
+  if(MD==='owner'){
+    list.forEach(function(x){var it=x.i||{},st=x.d==='是'?'✅已结算':'⏳待结';
+      h+='<div style="background:var(--s);border-radius:var(--r);padding:14px;margin-bottom:10px;border:1px solid var(--b)">';
+      h+='<div style="display:flex;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:4px">';
+      h+='<span style="font-size:.82rem;font-weight:600;color:var(--accent)">编号 '+(x.g||x.id)+'</span>';
+      h+='<span style="font-size:.72rem;color:var(--t2)">'+(x.dt||'')+'</span></div>';
+      h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;font-size:.78rem">';
+      h+='<div>支付宝: <span style="color:var(--accent)">'+x.a+'</span></div>';
+      h+='<div>姓名: <span style="color:var(--accent)">'+x.n+'</span></div>';
+      h+='<div>比例: 1:'+x.rt+'</div><div>出币M: '+x.rn+'M</div>';
+      h+='<div>出币费: ¥'+(x.co||0).toFixed(2)+'</div><div>物资费: ¥'+(x.im||0).toFixed(2)+'</div>';
+      h+='<div style="grid-column:span 2;font-weight:700;color:var(--accent)">总计: ¥'+(x.t||0).toFixed(2)+'</div>';
+      h+='<div style="grid-column:span 2;border-top:1px solid var(--b);padding-top:6px;margin-top:4px">';
+      h+='<span style="font-size:.72rem;color:var(--t2)">AW='+(it.aw||0)+' 红蛋='+(it.hd||0)+' 六甲='+(it.lj||0)+' 六头='+(it.lt||0)+' 红甲修='+(it.hjx||0)+' 红头修='+(it.htx||0)+' 金包='+(it.qzb||0)+' 体验卡='+(it.tyk||0)+' 大红包='+(it.dhb||0)+'</span>';
+      if(x.ls)h+='<br><span style="color:var(--t2);font-size:.72rem">装备损失: '+x.ls+'</span>';
+      h+='</div><div style="grid-column:span 2;margin-top:6px"><span class="sb '+(x.d==='是'?'sd':'sw')+'">'+st+'</span></div></div></div>';
+    });
+  }else{
+    list.forEach(function(x){
+      var it=x.i||{},sc=x.d==='是'?'sd':'sw',st=x.d==='是'?'✅已结算':'⏳待结';
+      h+='<tr><td>#'+x.id+'</td><td>'+(x.dt||'')+'</td><td>'+x.a+'</td><td>'+x.g+'</td><td>'+(x.d==='是'?'✅':'❌')+'</td><td>1:'+x.rt+'</td><td>'+x.rn+'M</td><td>¥'+(x.co||0).toFixed(2)+'</td>';
+      h+='<td>'+(it.aw||0)+'</td><td>'+(it.hd||0)+'</td><td>'+(it.lj||0)+'/'+(it.lt||0)+'</td><td>'+(it.hjx||0)+'</td><td>'+(it.htx||0)+'</td>';
+      h+='<td>'+(it.qzb||0)+'</td><td>'+(it.tyk||0)+'</td><td>'+(it.dhb||0)+'</td><td>¥'+(x.im||0).toFixed(2)+'</td><td>¥'+(x.t||0).toFixed(2)+'</td>';
+      h+='<td><span class="sb '+sc+'">'+st+'</span></td><td class="ad2">';
+      if(x.d!=='是')h+='<span class="ad2"><button class="btn bp" style="padding:3px 8px;font-size:.7rem" onclick="ck('+x.id+')">✓</button></span>';
+      h+='<span class="ad2"><button class="b2" onclick="ed('+x.id+')">✎</button> <button class="b3" onclick="dl('+x.id+')">✕</button></span></td></tr>';
+      var dp=D.find(function(y){return y.ref&&y.pid===x.id});
+      if(dp)h+='<tr style="background:rgba(0,184,148,.05);color:var(--green);font-size:.7rem"><td></td><td>'+(dp.dt||'')+'</td><td>'+dp.a+'</td><td>'+dp.g+'</td><td colspan="2">保证金退还</td><td></td><td></td><td colspan="9"></td><td>¥5.00</td><td></td><td class="ad2"></td></tr>';
+    });
+  }
+  document.getElementById('tb').innerHTML=h||(MD==='owner'?'<div style="text-align:center;color:var(--t2);padding:30px">暂无你的记录</div>':'<tr><td colspan="20" style="text-align:center;color:var(--t2);padding:30px">暂无数据</td></tr>');
+  sv2('h9',D);
+  document.querySelectorAll('.ad2').forEach(function(e){e.style.display=MD==='admin'?'':'none'});if(MD==='owner'){var tbl=document.querySelector('table');if(tbl)tbl.style.display=''}
+}
+
+function ck(id){if(!confirm('确认已打款？'))return;var x=D.find(function(v){return v.id===id});if(x){x.d='是';rd()}}
+function dl(id){if(!confirm('删除？'))return;D=D.filter(function(v){return v.id!==id});rd()}
+
+function ex(){
+  var today=new Date().toISOString().slice(0,10);
+  var ok=D.filter(function(x){return (x.d==='是'||x.ref)&&x.dt===today});
+  if(!ok.length){alert('今天没有可导出的记录');return}
+  var c='序号,收款方支付宝账号,收款方姓名,金额（元）,备注\n';
+  ok.forEach(function(x,i){
+    if(x.ref){
+      c+=(i+1)+','+x.a+','+x.n+',5.00,编号'+(x.g||x.pid)+'号主保证金退还 '+(x.dt||'')+'\n';
+    }else{
+      var bz='编号'+(x.g||x.id)+'号主出币结算';if(x.dt)bz+=' '+x.dt;
+      c+=(i+1)+','+x.a+','+x.n+','+Math.floor(x.t||0)+','+bz+'\n';
+    }
+  });
+  var b=new Blob(['\uFEFF'+c],{type:'text/csv;charset=utf-8'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(b);
+  a.download='号主结算_'+today+'.csv';a.click();
+}
+
+setM('owner');rd();
+</script>
+</body></html>
