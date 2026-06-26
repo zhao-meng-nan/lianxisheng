@@ -1,0 +1,263 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>零星商行 · 结算系统</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0f1923;--surface:#1a2a3a;--surface2:#243447;--border:#2d4052;--text:#e8edf0;--text2:#8899aa;--accent:#f5c518;--green:#00b894;--red:#e74c3c;--radius:8px}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);padding:16px;line-height:1.5}
+.app{max-width:800px;margin:0 auto}
+
+.header{text-align:center;margin-bottom:20px}
+.header h1{font-size:1.4rem;color:var(--accent)}
+.header .sub{font-size:.8rem;color:var(--text2);margin-top:4px}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.stat-card{background:var(--surface);border-radius:var(--radius);padding:14px;text-align:center}
+.stat-card .num{font-size:1.5rem;font-weight:700}
+.stat-card .lab{font-size:.7rem;color:var(--text2);margin-top:2px}
+.sc-yellow .num{color:var(--accent)}
+.sc-green .num{color:var(--green)}
+.sc-blue .num{color:#74b9ff}
+
+.toolbar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.btn{padding:8px 16px;border:none;border-radius:6px;font-size:.85rem;cursor:pointer;font-family:inherit}
+.btn-primary{background:var(--accent);color:#1a1a2e;font-weight:600}
+.btn-primary:hover{opacity:.85}
+.btn-sm{padding:5px 10px;font-size:.75rem}
+.btn-danger{background:var(--red);color:#fff}
+
+table{width:100%;border-collapse:collapse;background:var(--surface);border-radius:var(--radius);overflow:hidden;font-size:.82rem}
+th{background:var(--surface2);padding:8px 6px;text-align:left;font-weight:600;color:var(--text2);font-size:.72rem;white-space:nowrap}
+td{padding:8px 6px;border-top:1px solid var(--border)}
+tr:hover td{background:rgba(245,197,24,.03)}
+.st-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.72rem;font-weight:600}
+.st-wait{background:rgba(245,197,24,.15);color:var(--accent)}
+.st-done{background:rgba(0,184,148,.15);color:var(--green)}
+.st-problem{background:rgba(231,76,60,.15);color:var(--red)}
+
+/* 弹窗 */
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);z-index:999;justify-content:center;align-items:center}
+.modal.show{display:flex}
+.modal-box{background:var(--surface);border-radius:var(--radius);padding:24px;width:90%;max-width:560px;max-height:90vh;overflow-y:auto}
+.modal-box h2{font-size:1.1rem;margin-bottom:16px;color:var(--accent)}
+.form-row{margin-bottom:12px}
+.form-row label{display:block;font-size:.8rem;color:var(--text2);margin-bottom:4px;font-weight:500}
+.form-row input,.form-row select,.form-row textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);font-size:.9rem;font-family:inherit;color:var(--text);outline:none}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{border-color:var(--accent)}
+.form-row textarea{resize:vertical;min-height:60px}
+.form-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+
+@media(max-width:600px){
+  .stats{grid-template-columns:repeat(3,1fr)}
+  .stat-card{padding:10px}
+  .stat-card .num{font-size:1.1rem}
+  td,th{padding:6px 3px;font-size:.72rem}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="header">
+  <h1>零星商行 · 结算系统</h1>
+  <div class="sub">结算登记 · 打手号主对账</div>
+</div>
+
+<div class="stats" id="stats"></div>
+
+<div class="toolbar">
+  <button class="btn btn-primary" onclick="showForm()">➕ 新增结算</button>
+  <button class="btn btn-outline" onclick="exportCSV()">📥 导出</button>
+<button class="btn btn-outline" onclick="exportAlipay()">🏦 导出支付宝批量付款</button>
+  </div>
+
+<table>
+  <thead>
+    <tr>
+      <th>编号</th><th>角色</th><th>确认打完</th><th>支付宝</th><th>群编号</th>
+      <th>出租M数</th><th>装备损失</th><th>额外结算</th><th>状态</th><th>操作</th>
+    </tr>
+  </thead>
+  <tbody id="tbody"></tbody>
+</table>
+</div>
+
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <h2 id="mtitle">新增结算</h2>
+
+    <div class="form-row">
+      <label>是打手还是号主 *</label>
+      <select id="f-role">
+        <option value="号主">号主</option>
+        <option value="打手">打手</option>
+      </select>
+    </div>
+
+    <div class="form-row">
+      <label>打手是否已确认打完 *</label>
+      <select id="f-done">
+        <option value="是">✅ 是</option>
+        <option value="否">❌ 否</option>
+      </select>
+    </div>
+
+    <div class="form-row">
+      <label>支付宝账号 *</label>
+      <input id="f-alipay" placeholder="手机号或邮箱">
+    </div>
+
+    <div class="form-row">
+      <label>支付宝真实姓名 *</label>
+      <input id="f-name" placeholder="真实姓名">
+    </div>
+
+    <div class="form-row">
+      <label>和打手的群编号</label>
+      <input id="f-group" placeholder="群编号">
+    </div>
+
+    <div class="form-row">
+      <label>自己账号出租的多少M *</label>
+      <input id="f-rent" type="number" step="0.1" placeholder="如 100">
+    </div>
+
+    <div class="form-row">
+      <label>应结算金额（元）*</label>
+      <input id="f-amount" type="number" step="0.01" placeholder="输入金额，或留空根据汇率自动算">
+    </div>
+    <div class="form-row">
+      <label>有没有装备损失</label>
+      <textarea id="f-loss" placeholder="比如打手用你aw或者刘套啥的就写上，额外结算"></textarea>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="hideForm()">取消</button>
+      <button class="btn btn-primary" id="f-btn" onclick="save()">确认添加</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var data = JSON.parse(localStorage.getItem('settle2')||'[]');
+var eid = null;
+var nid = data.length>0?Math.max(...data.map(d=>d.id))+1:1;
+
+function render(){
+  var t=data.length,d=data.filter(d=>d.finish==='是').length,u=t-d;
+  document.getElementById('stats').innerHTML=[
+    '<div class="stat-card sc-yellow"><div class="num">'+t+'</div><div class="lab">总记录</div></div>',
+    '<div class="stat-card sc-green"><div class="num">'+d+'</div><div class="lab">已确认</div></div>',
+    '<div class="stat-card sc-blue"><div class="num">'+u+'</div><div class="lab">待确认</div></div>'
+  ].join('');
+
+  var h='';
+  data.forEach(function(d){
+    var st=d.finish==='是'?'done':'wait';
+    var stc=d.finish==='是'?'✅ 已确认':'⏳ 待确认';
+    h+='<tr><td>#'+d.id+'</td><td>'+d.role+'</td><td>'+stc+'</td><td>'+d.alipay+'</td><td>'+d.grp+'</td>';
+    h+='<td>'+d.rent+'M</td><td>'+(d.loss||'-')+'</td><td>'+(d.ext||'-')+'</td>';
+    h+='<td><span class="st-badge st-'+st+'">'+stc+'</span></td>';
+    h+='<td>';
+    if(d.finish!=='是') h+='<button class="btn btn-sm btn-primary" onclick="confirmDone('+d.id+')">确认</button> ';
+    h+='<button class="btn btn-sm btn-outline" onclick="editF('+d.id+')">✎</button> ';
+    h+='<button class="btn btn-sm btn-danger" onclick="del('+d.id+')">✕</button>';
+    h+='</td></tr>';
+  });
+  document.getElementById('tbody').innerHTML=h||'<tr><td colspan="10" style="text-align:center;color:var(--text2);padding:30px">暂无记录</td></tr>';
+  localStorage.setItem('settle2',JSON.stringify(data));
+}
+
+function showForm(){
+  eid=null;
+  document.getElementById('mtitle').textContent='新增结算';
+  document.getElementById('f-btn').textContent='确认添加';
+  ['f-role','f-done','f-alipay','f-name','f-group','f-rent','f-loss'].forEach(function(k){document.getElementById(k).value=k==='f-role'?'号主':k==='f-done'?'是':k==='f-rent'?'':''});
+  document.getElementById('modal').classList.add('show');
+}
+
+function editF(id){
+  var d=data.find(x=>x.id===id);if(!d)return;
+  eid=id;
+  document.getElementById('mtitle').textContent='编辑 #'+id;
+  document.getElementById('f-btn').textContent='保存修改';
+  document.getElementById('f-role').value=d.role;
+  document.getElementById('f-done').value=d.finish;
+  document.getElementById('f-alipay').value=d.alipay;
+  document.getElementById('f-name').value=d.name;
+  document.getElementById('f-group').value=d.grp;
+  document.getElementById('f-rent').value=d.rent;document.getElementById('f-amount').value=d.amount||'';
+  document.getElementById('f-loss').value=d.loss||'';
+  document.getElementById('modal').classList.add('show');
+}
+
+function hideForm(){document.getElementById('modal').classList.remove('show')}
+
+function save(){
+  var role=document.getElementById('f-role').value;
+  var finish=document.getElementById('f-done').value;
+  var alipay=document.getElementById('f-alipay').value.trim();
+  var name=document.getElementById('f-name').value.trim();
+  var grp=document.getElementById('f-group').value.trim();
+  var rent=document.getElementById('f-rent').value.trim();
+var amount=document.getElementById('f-amount').value.trim();
+  var loss=document.getElementById('f-loss').value.trim();
+
+  if(!alipay||!name||!rent){alert('请填写支付宝账号、姓名和出租M数');return}
+
+  if(eid){
+    var d=data.find(x=>x.id===eid);
+    if(d){d.role=role;d.finish=finish;d.alipay=alipay;d.name=name;d.grp=grp;d.rent=rent;d.loss=loss;d.ext=loss?'待结算':''}
+  }else{
+    data.push({id:nid++,role,finish,alipay,name,grp,rent,loss,ext:loss?"待结算":"",amount:amount||"",time:new Date().toLocaleString()});
+  }
+  hideForm();render();
+}
+
+function confirmDone(id){
+  if(!confirm('确认此单已完成打款？'))return;
+  var d=data.find(x=>x.id===id);
+  if(d){d.finish='是';render()}
+}
+
+function del(id){
+  if(!confirm('删除 #'+id+'？'))return;
+  data=data.filter(x=>x.id!==id);render();
+}
+
+function exportAlipay(){
+  var done=data.filter(function(d){return d.finish==='是'});
+  if(!done.length){alert('没有已确认的结算记录');return}
+  
+  var lines='序号,收款方支付宝账号,收款方姓名,金额（元）,备注\n';
+  done.forEach(function(d,i){
+    var amt=d.amount||'0.00';
+    var note='编号'+d.id+(d.role==='打手'?'打手押金退还':'号主出币结算');
+    if(d.grp) note+=' '+d.grp;
+    lines+=(i+1)+','+d.alipay+','+d.name+','+amt+','+note+'\n';
+  });
+  
+  var b=new Blob(['\uFEFF'+lines],{type:'text/csv;charset=utf-8'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(b);
+  a.download='支付宝批量付款_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+}
+
+function exportCSV(){
+  var c='编号,角色,确认打完,支付宝账号,真实姓名,群编号,出租M数,装备损失,额外结算,时间\n';
+  data.forEach(function(d){
+    c+=d.id+','+d.role+','+d.finish+','+d.alipay+','+d.name+','+d.grp+','+d.rent+'M,'+(d.loss||'-')+','+(d.ext||'-')+','+(d.time||'')+'\n';
+  });
+  var b=new Blob(['\uFEFF'+c],{type:'text/csv;charset=utf-8'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(b);
+  a.download='零星商行_结算_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+}
+
+render();
+</script>
+</body>
+</html>
+
+
+
