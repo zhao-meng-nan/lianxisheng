@@ -96,9 +96,9 @@ td{padding:5px 3px;border-top:1px solid var(--b)}
 </div></div>
 
 <script>
-function db(){try{var d=localStorage.getItem('h9');return d?JSON.parse(d):[]}catch(e){return[]}}
-function sv2(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
-var D=db();['h9','h8','h7','h6','h5','h4','h3','h2','hz3','hz2','settle2','hz_settle'].forEach(function(k){try{var d=JSON.parse(localStorage.getItem(k));if(d&&d.length){d.forEach(function(x){if(!D.find(function(y){return y.id===x.id}))D.push(x)})}}catch(e){}});if(D.length)sv2('h9',D);
+const SB='https://iaephisskowhsimykreh.supabase.co';const SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlhZXBoaXNza293aHNpbXlrcmVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NTk5ODMsImV4cCI6MjA5ODAzNTk4M30.-T4-xUv2h3FS4l330KPtts49GYNbfGPG94kitmTys-8';function sbReq(m,u,b){var x=new XMLHttpRequest();x.open(m,u,false);x.setRequestHeader('apikey',SK);x.setRequestHeader('Authorization','Bearer '+SK);x.setRequestHeader('Content-Type','application/json');if(b)x.send(JSON.stringify(b));else x.send();return x}function db(){try{var r=sbReq('GET',SB+'/rest/v1/settle_data?key=eq.hz9&select=value');if(r.status===200){var d=JSON.parse(r.responseText);if(d&&d.length&&d[0].value){localStorage.setItem('h9',JSON.stringify(d[0].value));return d[0].value}}}catch(e){}try{var d=localStorage.getItem('h9');return d?JSON.parse(d):[]}catch(e){return[]}}function syncFromServer(){var x=new XMLHttpRequest();x.open('GET','/api/records',false);x.send();if(x.status===200){var d=JSON.parse(x.responseText);if(d&&d.length){localStorage.setItem('h9',JSON.stringify(d));return d}}return null}
+function sv2(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}var x=new XMLHttpRequest();x.open('POST','/api/records/sync',false);x.setRequestHeader('Content-Type','application/json');x.send(JSON.stringify(v))}
+var D=db();try{var sd=syncFromServer();if(sd)D=sd}catch(e){}['h9','h8','h7','h6','h5','h4','h3','h2','hz3','hz2','settle2','hz_settle'].forEach(function(k){try{var d=JSON.parse(localStorage.getItem(k));if(d&&d.length){d.forEach(function(x){if(!D.find(function(y){return y.id===x.id}))D.push(x)})}}catch(e){}});if(D.length)sv2('h9',D);
 var EI=null,NI=D.length?D.reduce(function(m,x){return Math.max(m,x.id||0)},0)+1:1;
 var MD='admin',OW='';
 var P={aw:.6,hd:7/60,lj:1.5,lt:1.5,hjx:1,htx:.5,qzb:4,tyk:3,dhb:1};
