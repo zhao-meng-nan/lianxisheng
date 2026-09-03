@@ -1,306 +1,662 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>哈弗币汇率计算器 - 三角形行动</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>三角洲行动 · 哈夫币计算器</title>
+
+
+
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#0f1923;--surface:#1a2a3a;--surface2:#243447;--border:#2d4052;--text:#e8edf0;--text-secondary:#8899aa;--accent:#f5c518;--coin:#f5c518;--cny:#00b894;--shadow:0 4px 20px rgba(0,0,0,.3);--radius:10px}
-html{font-size:16px}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);display:flex;justify-content:center;align-items:flex-start;min-height:100vh;line-height:1.5;padding:24px 16px}
-.app{width:100%;max-width:460px}
-.header{text-align:center;margin-bottom:20px}
-.header h1{font-size:1.3rem;font-weight:700}
-.header .sub{font-size:.8rem;color:var(--text-secondary);margin-top:4px}
-.card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;margin-bottom:12px}
-.sec-title{font-size:.75rem;font-weight:600;color:var(--text-secondary);margin-bottom:14px;letter-spacing:.05em}
-.stat-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
-.stat-row:last-child{margin-bottom:0}
-.stat-label{min-width:52px;font-size:.85rem;font-weight:500}
-.stat-bar-wrap{flex:1;min-width:100px;position:relative}
-.stat-bar-bg{height:8px;background:var(--surface2);border-radius:4px;position:relative;overflow:hidden;cursor:pointer}
-.stat-bar-fill{height:100%;border-radius:4px;transition:width .15s}
-.sf-stamina{background:linear-gradient(90deg,#00b894,#00cec9)}
-.sf-load{background:linear-gradient(90deg,#e17055,#fab1a0)}
-.stat-select{width:64px;padding:6px 4px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);font-size:.9rem;font-family:inherit;color:var(--text);outline:none;cursor:pointer;appearance:auto;text-align:center}
-.stat-select:focus{border-color:var(--accent)}
-.stat-dots{display:flex;justify-content:space-between;position:absolute;top:0;left:0;right:0;height:100%;pointer-events:none}
-.stat-dot{width:14px;height:8px;border-radius:1px}
-.stat-dot.filled.s-stamina{background:#00b894}
-.stat-dot.filled.s-load{background:#e17055}
-.f-box{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 16px;text-align:center;margin-bottom:16px}
-.f-box .fl{font-size:.7rem;color:var(--text-secondary);margin-bottom:4px}
-.f-box .fv{font-size:1.5rem;font-weight:700;color:var(--accent)}
-.f-box .fs{font-size:.75rem;color:var(--text-secondary);margin-top:4px;word-break:break-all}
-.rate-card{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:16px}
-.rate-side{text-align:center}
-.rate-side .rl{font-size:.7rem;color:var(--text-secondary);margin-bottom:2px}
-.rate-side .rv{font-size:1.2rem;font-weight:700}
-.rate-side .rv.coin{color:var(--coin)}
-.rate-side .rv.cny{color:var(--cny)}
-.rate-arrow{font-size:1.2rem;color:var(--text-secondary)}
-.conv-row{display:flex;gap:10px;margin-bottom:10px}
-.conv-field{flex:1}
-.conv-field label{display:block;font-size:.75rem;color:var(--text-secondary);margin-bottom:4px}
-.conv-field input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);font-size:.95rem;font-family:inherit;color:var(--text);outline:none}
-.conv-field input:focus{border-color:var(--accent)}
-.rbox{background:linear-gradient(135deg,#1a2a3a,#243447);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center}
-.rbox .rl{font-size:.7rem;color:var(--text-secondary)}
-.rbox .rb{font-size:1.8rem;font-weight:700;margin:4px 0}
-.rbox .rb.coin{color:var(--coin)}
-.rbox .rb.cny{color:var(--cny)}
-.rbox .rs{font-size:.8rem;color:var(--text-secondary)}
-.cbar{display:flex;justify-content:space-between;padding:8px 0 0;font-size:.75rem;color:var(--text-secondary);border-top:1px solid var(--border);margin-top:12px}
-.cbar .cv{color:#e74c3c;font-weight:600}
-.cbar .cr{color:var(--cny);font-weight:600}
-.quick-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
-.quick-btn{padding:10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:.85rem;cursor:pointer;font-family:inherit;text-align:center}
-.quick-btn:hover{border-color:var(--accent);background:rgba(245,197,24,.08)}
-.quick-btn .qs{font-size:.65rem;color:var(--text-secondary);margin-top:2px}
-.footer{text-align:center;margin-top:20px;font-size:.7rem;color:var(--text-secondary)}
-@media(max-width:400px){
-  .quick-grid{grid-template-columns:1fr}
-  .rate-card{grid-template-columns:1fr}
-  .rate-arrow{transform:rotate(90deg)}
-  .rbox .rb{font-size:1.5rem}
+:root{
+  --bg:#07111f;
+  --bg2:#0b1728;
+  --card:#0f1e31;
+  --card2:#13243a;
+  --line:#203a58;
+  --text:#eef6ff;
+  --muted:#91a8c1;
+  --blue:#2f8cff;
+  --blue2:#55b8ff;
+  --blue-soft:rgba(47,140,255,.12);
+  --gold:#ffc86b;
+  --shadow:0 12px 32px rgba(0,0,0,.28);
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{
+  margin:0;
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(47,140,255,.18), transparent 24%),
+    radial-gradient(circle at 90% 10%, rgba(85,184,255,.10), transparent 22%),
+    linear-gradient(180deg,#06101d 0,#091523 45%,#07111f 100%);
+  color:var(--text);
+  font-family:"Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,"PingFang SC","Segoe UI",Arial,sans-serif;
+}
+.wrap{
+  max-width:520px;
+  margin:0 auto;
+  padding:14px 12px 38px;
+  position:relative;
+  z-index:2;
+}
+.hero{
+  background:linear-gradient(135deg,#0f2f54 0%, #154f83 55%, #1a6fad 100%);
+  color:#fff;
+  border:1px solid rgba(85,184,255,.22);
+  border-radius:24px;
+  padding:17px 15px 15px;
+  box-shadow:0 14px 34px rgba(0,0,0,.28);
+  margin-bottom:14px;
+  position:relative;
+  overflow:hidden;
+}
+.hero::before{
+  content:"";
+  position:absolute;
+  right:-38px;
+  top:-38px;
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  background:rgba(255,255,255,.06);
+}
+.hero::after{
+  content:"";
+  position:absolute;
+  right:28px;
+  top:20px;
+  width:46px;
+  height:46px;
+  border-radius:15px;
+  background:rgba(255,255,255,.05);
+  transform:rotate(22deg);
+}
+.brand{
+  display:inline-flex;
+  align-items:center;
+  font-size:12px;
+  font-weight:800;
+  color:#cbe8ff;
+  letter-spacing:.02em;
+}
+.brand::before{content:"";display:none}
+h1{
+  margin:8px 0 6px;
+  font-size:25px;
+  line-height:1.15;
+  font-weight:900;
+}
+.desc{
+  font-size:12px;
+  line-height:1.6;
+  color:rgba(236,247,255,.90);
+}
+.badge{
+  margin-top:10px;
+  display:inline-flex;
+  padding:6px 10px;
+  border-radius:999px;
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.10);
+  font-size:11px;
+  color:#d9efff;
+}
+.grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:12px;
+}
+.card{
+  background:linear-gradient(180deg,var(--card2),var(--card));
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:14px;
+  box-shadow:var(--shadow);
+}
+.title{
+  font-size:15px;
+  font-weight:900;
+  margin-bottom:12px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.title::before{
+  content:"";
+  width:4px;
+  height:16px;
+  border-radius:6px;
+  background:linear-gradient(180deg,var(--blue2),var(--blue));
+}
+.label{
+  display:block;
+  color:#b7c8db;
+  font-size:12px;
+  margin:0 0 6px;
+}
+.controls{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:10px;
+  margin-bottom:14px;
+}
+select,input{
+  width:100%;
+  background:#0b1828;
+  border:1px solid #294664;
+  color:#eef6ff;
+  border-radius:14px;
+  padding:12px 12px;
+  font-size:16px;
+  outline:none;
+}
+select:focus,input:focus{
+  border-color:#4ea4ff;
+  box-shadow:0 0 0 3px rgba(47,140,255,.12);
+}
+.ratio-box{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  padding:14px;
+  border-radius:18px;
+  background:linear-gradient(180deg,rgba(47,140,255,.12),rgba(85,184,255,.06));
+  border:1px solid rgba(85,184,255,.22);
+}
+.ratio-big{
+  font-size:35px;
+  font-weight:1000;
+  color:#6bc0ff;
+  text-shadow:0 0 18px rgba(85,184,255,.12);
+}
+.ratio-note{
+  color:#9fb4c9;
+  font-size:12px;
+  line-height:1.65;
+}
+.manual{margin-top:12px}
+.manual-row{
+  display:grid;
+  grid-template-columns:70px minmax(0,1fr) 100px;
+  gap:8px;
+  align-items:stretch;
+}
+.fixed,.unit{
+  background:#0b1828;
+  border:1px solid #294664;
+  border-radius:14px;
+  padding:12px;
+  text-align:center;
+  color:#a9bdd1;
+}
+button{
+  border:0;
+  background:linear-gradient(180deg,#338fff,#2478dc);
+  color:#fff;
+  border-radius:14px;
+  padding:12px 14px;
+  cursor:pointer;
+  font-size:14px;
+  font-weight:800;
+  box-shadow:0 7px 18px rgba(47,140,255,.18);
+}
+.quick{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:12px;
+}
+.quick button{
+  background:#10243b;
+  color:#8ed0ff;
+  border:1px solid #2a4e72;
+  box-shadow:none;
+}
+.calc-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 118px;
+  gap:8px;
+  align-items:stretch;
+}
+.commission-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 110px;
+  gap:8px;
+  align-items:stretch;
+}
+.result{
+  margin-top:14px;
+  padding:16px;
+  border-radius:18px;
+  background:linear-gradient(135deg,#123e6a 0%, #0d659d 100%);
+  border:1px solid rgba(85,184,255,.20);
+}
+.result-kicker{
+  font-size:12px;
+  color:#c5e7ff;
+}
+.result-main{
+  font-size:34px;
+  font-weight:1000;
+  margin:6px 0 4px;
+}
+.result-main span{
+  color:#fff;
+}
+.meta{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:8px;
+  margin-top:12px;
+}
+.meta>div{
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.08);
+  padding:12px;
+  border-radius:14px;
+}
+.meta b{
+  display:block;
+  font-size:18px;
+  margin-top:4px;
+  color:#fff;
+}
+.preset-list,.material-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:8px;
+}
+.material-item,.preset{
+  background:#0c1a2b;
+  border:1px solid #223f5e;
+  border-radius:16px;
+  padding:12px;
+}
+.material-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:8px;
+}
+.material-name,.preset .p1{
+  font-weight:900;
+  color:#eef6ff;
+}
+.material-price{
+  font-size:11px;
+  color:#88ccff;
+  background:rgba(47,140,255,.10);
+  border-radius:999px;
+  padding:4px 8px;
+  white-space:nowrap;
+}
+.material-subtotal{
+  margin-top:8px;
+  font-size:12px;
+  color:#8fa8c0;
+}
+.preset .p2{
+  color:#74c4ff;
+  font-size:18px;
+  font-weight:1000;
+  margin-top:6px;
+}
+.material-total{
+  margin-top:10px;
+  padding:12px 14px;
+  border-radius:16px;
+  background:rgba(47,140,255,.09);
+  border:1px solid rgba(85,184,255,.18);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.material-total span{
+  color:#b5c8db;
+  font-size:13px;
+}
+.material-total b{
+  font-size:20px;
+  color:#75c5ff;
+}
+.grand-card{grid-column:1 / -1}
+.grand-total{
+  margin-top:0;
+  padding:16px;
+  border-radius:20px;
+  background:linear-gradient(135deg,#071525 0%,#0d2d4a 100%);
+  border:1px solid #244766;
+  color:#fff;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:10px;
+}
+.grand-label{
+  font-size:16px;
+  font-weight:1000;
+}
+.grand-note{
+  font-size:12px;
+  color:#94abc0;
+}
+.grand-total b{
+  font-size:34px;
+  color:var(--gold);
+}
+.watermark{
+  position:fixed;
+  top:40%;
+  left:50%;
+  transform:translate(-50%, -50%) rotate(-14deg);
+  font-size:40px;
+  font-weight:1000;
+  letter-spacing:.10em;
+  color:rgba(117,197,255,.16);
+  pointer-events:none;
+  user-select:none;
+  z-index:9999;
+  white-space:nowrap;
+}
+.contact-watermark{
+  position:fixed;
+  left:50%;
+  top:69%;
+  transform:translate(-50%, -50%);
+  text-align:center;
+  font-size:13px;
+  line-height:1.8;
+  font-weight:900;
+  color:rgba(255,200,107,.58);
+  pointer-events:none;
+  user-select:none;
+  z-index:9999;
+  width:92%;
 }
 </style>
+
+
+
 </head>
 <body>
-<div style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;overflow:hidden;display:flex;align-items:center;justify-content:center">
-  <div style="font-size:3rem;font-weight:700;color:rgba(245,197,24,0.15);transform:rotate(-25deg);white-space:nowrap;user-select:none;letter-spacing:8px">零星商行</div>
-  <div style="position:absolute;bottom:20%;left:0;right:0;text-align:center;font-size:0.8rem;color:rgba(255,255,255,0.5);pointer-events:none;user-select:none;line-height:2;z-index:9999">
-    号主出币企鹅群：1002605515<br>打手猛攻企鹅群：1059276439
-  </div>
-</div>
-<div class="app">
-<div class="header">
-  <h1>🔺 哈弗币汇率计算器</h1>
-  <div class="sub">三角形行动 · 格数(保险) · 体力 · 负重</div>
-</div>
-
-<div class="card">
-  <div class="sec-title">角色属性</div>
-
-  <div class="stat-row">
-    <div class="stat-label">🛡格数(保险)</div>
-    <select class="stat-select" id="sel-insurance">
-      <option value="2">2</option>
-      <option value="4">4</option>
-      <option value="6">6</option>
-      <option value="9" selected>9</option>
-    </select>
+<div class="wrap">
+  <div class="hero">
+    <div>
+      <div class="brand">零星商行</div>
+      <h1>哈夫币计算器</h1>
+      <div class="desc">手机端快捷计算哈夫币、物资与最终合计。</div>
+    </div>
+    <div class="badge">手机端使用</div>
   </div>
 
-  <div class="stat-row">
-    <div class="stat-label">⚡体力</div>
-    <div class="stat-bar-wrap">
-      <div class="stat-bar-bg" id="bar-stamina">
-        <div class="stat-bar-fill sf-stamina" style="width:100%"></div>
-        <div class="stat-dots" id="dots-stamina"></div>
+  <div class="grid">
+    <section class="card">
+      <div class="title">角色属性</div>
+      <div class="controls">
+        <div>
+          <label class="label">🛡 保险格数</label>
+          <select id="grid" onchange="autoRatio()">
+            <option value="9">9格</option>
+            <option value="6">6格</option>
+            <option value="4">4格</option>
+          </select>
+        </div>
+        <div>
+          <label class="label">⚡ 体力</label>
+          <select id="stamina" onchange="autoRatio()">
+            <option value="7">7（满）</option>
+            <option value="6">6</option>
+            <option value="5">5</option>
+            <option value="4">4</option>
+            <option value="3">3</option>
+            <option value="2">2</option>
+            <option value="1">1</option>
+          </select>
+        </div>
+        <div>
+          <label class="label">🎒 负重</label>
+          <select id="weight" onchange="autoRatio()">
+            <option value="7">7（满）</option>
+            <option value="6">6</option>
+            <option value="5">5</option>
+            <option value="4">4</option>
+            <option value="3">3</option>
+            <option value="2">2</option>
+            <option value="1">1</option>
+          </select>
+        </div>
       </div>
-    </div>
-    <select class="stat-select" id="sel-stamina">
-      <option value="1">1</option><option value="2">2</option><option value="3">3</option>
-      <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-      <option value="7" selected>7</option>
-    </select>
-  </div>
 
-  <div class="stat-row">
-    <div class="stat-label">🎒负重</div>
-    <div class="stat-bar-wrap">
-      <div class="stat-bar-bg" id="bar-load">
-        <div class="stat-bar-fill sf-load" style="width:100%"></div>
-        <div class="stat-dots" id="dots-load"></div>
+      <div style="margin-bottom:18px;">
+        <label class="label">📦 物资</label>
+        <div class="material-grid">
+          <div class="material-item">
+            <div class="material-head">
+              <div class="material-name">AW子弹</div>
+              <div class="material-price">¥0.60 / 发</div>
+            </div>
+            <input id="awQty" type="number" min="0" step="1" value="0" placeholder="数量" oninput="calculateMaterials()">
+            <div class="material-subtotal" id="awSubtotal">小计：¥0.00</div>
+          </div>
+          <div class="material-item">
+            <div class="material-head">
+              <div class="material-name">其他红蛋</div>
+              <div class="material-price">¥0.11 / 发</div>
+            </div>
+            <input id="redQty" type="number" min="0" step="1" value="0" placeholder="数量" oninput="calculateMaterials()">
+            <div class="material-subtotal" id="redSubtotal">小计：¥0.00</div>
+          </div>
+          <div class="material-item">
+            <div class="material-head">
+              <div class="material-name">咖啡豆</div>
+              <div class="material-price">¥2.00 / 个</div>
+            </div>
+            <input id="coffeeQty" type="number" min="0" step="1" value="0" placeholder="数量" oninput="calculateMaterials()">
+            <div class="material-subtotal" id="coffeeSubtotal">小计：¥0.00</div>
+          </div>
+          <div class="material-item">
+            <div class="material-head">
+              <div class="material-name">六级甲</div>
+              <div class="material-price">¥1.50 / 个</div>
+            </div>
+            <input id="armorQty" type="number" min="0" step="1" value="0" placeholder="数量" oninput="calculateMaterials()">
+            <div class="material-subtotal" id="armorSubtotal">小计：¥0.00</div>
+          </div>
+          <div class="material-item">
+            <div class="material-head">
+              <div class="material-name">六级头</div>
+              <div class="material-price">¥1.50 / 个</div>
+            </div>
+            <input id="helmetQty" type="number" min="0" step="1" value="0" placeholder="数量" oninput="calculateMaterials()">
+            <div class="material-subtotal" id="helmetSubtotal">小计：¥0.00</div>
+          </div>
+        </div>
+        <div class="material-total">
+          <span>物资合计</span>
+          <b id="materialTotal">¥0.00</b>
+        </div>
+
       </div>
-    </div>
-    <select class="stat-select" id="sel-load">
-      <option value="1">1</option><option value="2">2</option><option value="3">3</option>
-      <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-      <option value="7" selected>7</option>
-    </select>
+
+      <div class="ratio-box">
+        <div>
+          <div class="label">当前比例</div>
+          <div class="ratio-big" id="ratioShow">1:50</div>
+        </div>
+        <div class="ratio-note" id="ratioNote">9格基础 38<br>满体满负，无额外加成</div>
+      </div>
+
+      <div class="manual">
+        <label class="label">手动修改比例（1 元 : 多少万哈夫币）</label>
+        <div class="manual-row">
+          <div class="fixed">1 :</div>
+          <input id="ratio" type="number" value="42" step="0.1" oninput="manualRatio()"/>
+          <button onclick="autoRatio()" style="border:1px solid #3a463f;background:#171d1a;color:#fff;border-radius:10px;cursor:pointer;">恢复自动</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="title">兑换计算</div>
+      
+
+      <label class="label">哈夫币数量</label>
+      <div class="calc-row">
+        <input id="amount" type="number" value="100" step="0.01" oninput="calculate()"/>
+        <div class="unit">M 哈夫币</div>
+      </div>
+
+      <div class="quick">
+        <button onclick="setAmount(50)">50M</button>
+        <button onclick="setAmount(100)">100M</button>
+        <button onclick="setAmount(200)">200M</button>
+        <button onclick="setAmount(500)">500M</button>
+        <button onclick="setAmount(1000)">1000M</button>
+      </div>
+
+      <div class="commission-row">
+        <div>
+          <label class="label">固定佣金（10%）</label>
+          <input id="commission" type="number" value="10" readonly aria-readonly="true" style="cursor:not-allowed;opacity:.8;"/>
+        </div>
+        <div>
+          <label class="label">&nbsp;</label>
+          <div class="unit">% 比例</div>
+        </div>
+      </div>
+
+      <div class="result">
+        <div class="result-kicker" id="resultLabel">100M 哈夫币折合</div>
+        <div class="result-main" id="resultMain"><span>¥263.16</span></div></div>
+    </section>
+
+    <section class="card">
+      <div class="title">基准比例</div>
+      <div class="preset-list">
+        <div class="preset" onclick="preset(9,7,7,42)"><div class="p1">9格 · 满体满负</div><div class="p2">1:42</div></div>
+        <div class="preset" onclick="preset(9,5,5,46)"><div class="p1">9格 · 5体5负</div><div class="p2">1:46</div></div>
+        <div class="preset" onclick="preset(6,7,7,44)"><div class="p1">6格 · 满体满负</div><div class="p2">1:44</div></div>
+        <div class="preset" onclick="preset(6,5,5,48)"><div class="p1">6格 · 5体5负</div><div class="p2">1:48</div></div>
+        <div class="preset" onclick="preset(4,7,7,47)"><div class="p1">4格 · 满体满负</div><div class="p2">1:47</div></div>
+        <div class="preset" onclick="preset(4,5,5,51)"><div class="p1">4格 · 5体5负</div><div class="p2">1:51</div></div>
+      </div>
+    </section>
+<section class="card grand-card">
+      <div class="grand-total">
+        <div>
+          <div class="grand-label">最终合计</div>
+          <div class="grand-note">哈夫币金额 + 物资金额</div>
+        </div>
+        <b id="grandTotal">¥0.00</b>
+      </div>
+    </section>
   </div>
-
-  <div class="f-box">
-    <div class="fl">汇率</div>
-    <div class="fv" id="f-result">1:38</div>
-    <div class="fs" id="f-detail">基础38 ← 9格 → 体+0 → 负+0 = 38 万/元</div>
-  </div>
-
-  <div class="rate-card">
-    <div class="rate-side">
-      <div class="rl">汇率</div>
-      <div class="rv coin" id="rate-per-yuan">1:38</div>
-      <div class="rl">元 : 万</div>
-    </div>
-    <div class="rate-arrow">⇄</div>
-    <div class="rate-side">
-      <div class="rl">1m 哈弗币</div>
-      <div class="rv cny" id="rate-per-wan">2.70</div>
-      <div class="rl">元</div>
-    </div>
-  </div>
-
-  <div class="conv-row">
-    <div class="conv-field">
-      <label>哈弗币 (m)</label>
-      <input type="number" id="coin-input" step="any" value="100">
-    </div>
-    <div class="conv-field">
-      <label>人民币 (元)</label>
-      <input type="number" id="cny-input" step="any" value="">
-    </div>
-  </div>
-
-  <div class="rbox">
-    <div class="rl">兑换结果</div>
-    <div class="rb coin" id="result-val">100m</div>
-    <div class="rs" id="result-sub">哈弗币 → 人民币</div>
-    <div class="cbar">
-      <span>佣金 <span class="cv" id="comm-eff">10%</span></span>
-      <span>到手 <span class="cr" id="comm-real">¥0.00</span></span>
-    </div>
-  </div>
-</div>
-
-<div class="quick-grid">
-  <button class="quick-btn" data-g="9" data-s="7" data-l="7">9格 满体满负 <span class="qs">1:38</span></button>
-  <button class="quick-btn" data-g="9" data-s="5" data-l="5">9格 5体5负 <span class="qs">1:41</span></button>
-  <button class="quick-btn" data-g="6" data-s="7" data-l="7">6格 满体满负 <span class="qs">1:39</span></button>
-  <button class="quick-btn" data-g="6" data-s="5" data-l="5">6格 5体5负 <span class="qs">1:43</span></button>
-  <button class="quick-btn" data-g="4" data-s="7" data-l="7">4格 满体满负 <span class="qs">1:42</span></button>
-  <button class="quick-btn" data-g="4" data-s="5" data-l="5">4格 5体5负 <span class="qs">1:46</span></button>
-</div>
-
-
-
-<div class="footer">格数=保险 · 体力1~7 · 负重1~7 · 仅供参考</div>
 </div>
 
 <script>
-var st={stamina:7,load:7,insurance:9};
-// 佣金固定10%
+let autoMode=true;
 
-function gridBase(g){
-  var t={9:38,6:40,4:43,2:45};
-  return t[g]||46;
+function suggestedRatio(){
+  const g=Number(document.getElementById('grid').value);
+  const s=Number(document.getElementById('stamina').value);
+  const w=Number(document.getElementById('weight').value);
+
+  const base = {9:42,6:44,4:47}[g];
+  const penalty = (7-s) + (7-w);
+  return base + penalty;
 }
 
-function getRatio(){
-  return gridBase(st.insurance)+(7-st.stamina)+(7-st.load);
+function autoRatio(){
+  autoMode=true;
+  const r=suggestedRatio();
+  document.getElementById('ratio').value=r;
+  refreshRatioInfo();
+  calculate();
+}
+function manualRatio(){
+  autoMode=false;
+  refreshRatioInfo();
+  calculate();
+}
+function refreshRatioInfo(){
+  const r=Number(document.getElementById('ratio').value)||0;
+  const g=document.getElementById('grid').value;
+  const s=document.getElementById('stamina').value;
+  const w=document.getElementById('weight').value;
+  document.getElementById('ratioShow').textContent='1:'+r;
+  document.getElementById('ratioNote').innerHTML=
+    autoMode ? `${g}格 · 体力${s} · 负重${w}<br>自动估算比例` : `手动比例<br>1 元 = ${r} 万哈夫币`;
+}
+function setAmount(v){
+  document.getElementById('amount').value=v;
+  calculate();
+}
+function calculate(){
+  const ratio=Number(document.getElementById('ratio').value)||0;
+  const amount=Number(document.getElementById('amount').value)||0;
+  const commission=Math.max(0,Math.min(100,Number(document.getElementById('commission').value)||0));
+
+  if(ratio<=0){return}
+
+  const rmb=amount*100/ratio;
+  const net=rmb*(1-commission/100);
+  const netFloor=Math.floor(net);
+  window.currentCoinRmb = netFloor;
+  document.getElementById('resultLabel').textContent=`${amount}M 哈夫币折合（已扣10%佣金）`;
+  document.getElementById('resultMain').innerHTML=`<span>¥${netFloor}</span>`;
+  updateGrandTotal();
+}
+function preset(g,s,w,r){
+  document.getElementById('grid').value=g;
+  document.getElementById('stamina').value=s;
+  document.getElementById('weight').value=w;
+  document.getElementById('ratio').value=r;
+  autoMode=false;
+  refreshRatioInfo();
+  calculate();
 }
 
-// Init stamina/load dots
-['stamina','load'].forEach(function(k){
-  var c=document.getElementById('dots-'+k);
-  for(var i=1;i<=7;i++){var d=document.createElement('div');d.className='stat-dot';c.appendChild(d)}
-});
+function calculateMaterials(){
+  const aw = Math.max(0, Number(document.getElementById('awQty').value) || 0);
+  const red = Math.max(0, Number(document.getElementById('redQty').value) || 0);
+  const coffee = Math.max(0, Number(document.getElementById('coffeeQty').value) || 0);
+  const armor = Math.max(0, Number(document.getElementById('armorQty').value) || 0);
+  const helmet = Math.max(0, Number(document.getElementById('helmetQty').value) || 0);
 
-function setStat(k,v){
-  st[k]=v;
-  if(k!=='insurance'){
-    document.getElementById('sel-'+k).value=v;
-    document.querySelector('#bar-'+k+' .stat-bar-fill').style.width=((v-1)/6*100)+'%';
-    document.querySelectorAll('#dots-'+k+' .stat-dot').forEach(function(d,i){d.className='stat-dot'+(i<v?' filled s-'+k:'')});
-  }else{
-    document.getElementById('sel-'+k).value=v;
-  }
-  calc();
+  const awTotal = aw * 0.60;
+  const redTotal = red * 0.11;
+  const coffeeTotal = coffee * 2.00;
+  const armorTotal = armor * 1.50;
+  const helmetTotal = helmet * 1.50;
+  const total = awTotal + redTotal + coffeeTotal + armorTotal + helmetTotal;
+
+  document.getElementById('awSubtotal').textContent = `小计：¥${awTotal.toFixed(2)}`;
+  document.getElementById('redSubtotal').textContent = `小计：¥${redTotal.toFixed(2)}`;
+  document.getElementById('coffeeSubtotal').textContent = `小计：¥${coffeeTotal.toFixed(2)}`;
+  document.getElementById('armorSubtotal').textContent = `小计：¥${armorTotal.toFixed(2)}`;
+  document.getElementById('helmetSubtotal').textContent = `小计：¥${helmetTotal.toFixed(2)}`;
+  document.getElementById('materialTotal').textContent = `¥${total.toFixed(2)}`;
+  window.currentMaterialTotal = total;
+  updateGrandTotal();
 }
 
-// Bar clicks for stamina/load
-['stamina','load'].forEach(function(k){
-  document.getElementById('bar-'+k).addEventListener('click',function(e){
-    var r=this.getBoundingClientRect();
-    var v=Math.max(1,Math.min(7,Math.round(1+(e.clientX-r.left)/r.width*6)));
-    setStat(k,v);
-  });
-});
-
-// Select changes
-['stamina','load','insurance'].forEach(function(k){
-  document.getElementById('sel-'+k).addEventListener('change',function(){
-    setStat(k,parseInt(this.value));
-  });
-});
-
-function fmtCoin(n){
-  if(n>=100000000)return (n/100000000).toFixed(2)+'亿';
-  if(n>=1000000)return (n/1000000).toFixed(2)+'m';
-  return n.toLocaleString();
+function updateGrandTotal(){
+  const coin = Number(window.currentCoinRmb || 0);
+  const material = Number(window.currentMaterialTotal || 0);
+  document.getElementById('grandTotal').textContent = `¥${Math.floor(coin + material)}`;
 }
 
-function calc(){
-  var ratio=getRatio();
-  var cr=10;
-  var base=gridBase(st.insurance);
-  var afterSta=base+(7-st.stamina);
-  var afterLoad=afterSta+(7-st.load);
-  var sd=7-st.stamina>0?'+'+Math.abs(7-st.stamina):7-st.stamina<0?''+(7-st.stamina):'';
-  var ld=7-st.load>0?'+'+Math.abs(7-st.load):7-st.load<0?''+(7-st.load):'';
-
-  document.getElementById('f-detail').textContent='基础'+base+' ← '+st.insurance+'格 → 体'+sd+' → 负'+ld+' = '+ratio+' 万/元';
-  document.getElementById('f-result').textContent='1:'+ratio;
-  document.getElementById('rate-per-yuan').textContent='1:'+ratio;
-  document.getElementById('rate-per-wan').textContent=(10000/(ratio*10000)*10000).toFixed(2);
-  document.getElementById('comm-eff').textContent=cr+'%';
-
-  var cv=document.getElementById('coin-input').value;
-  var cnv=document.getElementById('cny-input').value;
-  if(cv&&!cnv)calcCV(cv,cr);else if(cnv&&!cv)calcCN(cnv,cr);else if(cv)calcCV(cv,cr);else clr();
-}
-
-function calcCV(v,cr){
-  var n=parseFloat(v);
-  if(!v||isNaN(n)||n<=0){clr();return}
-  var ratio=getRatio();
-  var raw=n*1000000/(ratio*10000);
-  var net=raw*(1-cr/100);
-  var ms=n>=1000?(n/1000).toFixed(2)+'亿':n.toFixed(2)+'m';
-  document.getElementById('result-val').className='rb cny';
-  document.getElementById('result-val').textContent='¥'+raw.toFixed(2);
-  document.getElementById('result-sub').textContent=ms+' 哈弗币';
-  document.getElementById('comm-real').textContent='¥'+net.toFixed(2);
-}
-
-function calcCN(v,cr){
-  var n=parseFloat(v);
-  if(!v||isNaN(n)||n<=0){clr();return}
-  var ratio=getRatio();
-  var net=Math.floor(n*ratio*10000*(1-cr/100));
-  document.getElementById('result-val').className='rb coin';
-  document.getElementById('result-val').textContent=fmtCoin(net);
-  document.getElementById('result-sub').textContent='¥'+n.toFixed(2)+' 人民币';
-  document.getElementById('comm-real').textContent=fmtCoin(net)+' 哈弗币';
-}
-
-function clr(){
-  document.getElementById('result-val').textContent='—';
-  document.getElementById('result-sub').textContent='请输入数值';
-  document.getElementById('comm-real').textContent='¥0.00';
-}
-
-document.getElementById('coin-input').addEventListener('input',function(){document.getElementById('cny-input').value='';calc();});
-document.getElementById('cny-input').addEventListener('input',function(){document.getElementById('coin-input').value='';calc();});
-
-document.querySelectorAll('.quick-btn').forEach(function(b){
-  b.addEventListener('click',function(){
-    setStat('insurance',parseInt(this.dataset.g));
-    setStat('stamina',parseInt(this.dataset.s));
-    setStat('load',parseInt(this.dataset.l));
-  });
-});
-
-setStat('insurance',9);setStat('stamina',7);setStat('load',7);
+autoRatio();
+calculateMaterials();
 </script>
+  <div class="watermark">零星商行</div>
+<div class="contact-watermark">
+  号主出币企鹅裙🐧：1002605515<br>
+  打手猛攻企鹅裙🐧：1059276439
+</div>
+
 </body>
 </html>
-
-
-
-
-
-
-
