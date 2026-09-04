@@ -179,7 +179,7 @@ select:focus,input:focus{
 .manual{margin-top:12px}
 .manual-row{
   display:grid;
-  grid-template-columns:70px minmax(0,1fr) 100px;
+  grid-template-columns:70px minmax(0,1fr);
   gap:8px;
   align-items:stretch;
 }
@@ -402,6 +402,7 @@ button{
             <option value="9">9格</option>
             <option value="6">6格</option>
             <option value="4">4格</option>
+            <option value="2">2格</option>
           </select>
         </div>
         <div>
@@ -486,7 +487,7 @@ button{
           <div class="label">当前比例</div>
           <div class="ratio-big" id="ratioShow">1:50</div>
         </div>
-        <div class="ratio-note" id="ratioNote">9格基础 38<br>满体满负，无额外加成</div>
+        <div class="ratio-note" id="ratioNote">9格基础 41<br>满体满负，无额外加成</div>
       </div>
 
       <div class="manual">
@@ -494,7 +495,6 @@ button{
         <div class="manual-row">
           <div class="fixed">1 :</div>
           <input id="ratio" type="number" value="41" step="0.1" oninput="manualRatio()"/>
-          <button onclick="autoRatio()" style="border:1px solid #3a463f;background:#171d1a;color:#fff;border-radius:10px;cursor:pointer;">恢复自动</button>
         </div>
       </div>
     </section>
@@ -539,9 +539,11 @@ button{
         <div class="preset" onclick="preset(9,7,7,41)"><div class="p1">9格 · 满体满负</div><div class="p2">1:41</div></div>
         <div class="preset" onclick="preset(9,5,5,45)"><div class="p1">9格 · 5体5负</div><div class="p2">1:45</div></div>
         <div class="preset" onclick="preset(6,7,7,43)"><div class="p1">6格 · 满体满负</div><div class="p2">1:43</div></div>
-        <div class="preset" onclick="preset(6,5,5,47)"><div class="p1">6格 · 5体5负</div><div class="p2">1:46</div></div>
-        <div class="preset" onclick="preset(4,7,7,46)"><div class="p1">4格 · 满体满负</div><div class="p2">1:47</div></div>
+        <div class="preset" onclick="preset(6,5,5,47)"><div class="p1">6格 · 5体5负</div><div class="p2">1:47</div></div>
+        <div class="preset" onclick="preset(4,7,7,46)"><div class="p1">4格 · 满体满负</div><div class="p2">1:46</div></div>
         <div class="preset" onclick="preset(4,5,5,50)"><div class="p1">4格 · 5体5负</div><div class="p2">1:50</div></div>
+        <div class="preset" onclick="preset(2,7,7,50)"><div class="p1">2格 · 满体满负</div><div class="p2">1:50</div></div>
+        <div class="preset" onclick="preset(2,5,5,54)"><div class="p1">2格 · 5体5负</div><div class="p2">1:54</div></div>
       </div>
     </section>
 <section class="card grand-card">
@@ -564,7 +566,7 @@ function suggestedRatio(){
   const s=Number(document.getElementById('stamina').value);
   const w=Number(document.getElementById('weight').value);
 
-  const base = {9:42,6:44,4:47}[g];
+  const base = {9:41,6:43,4:46,2:50}[g];
   const penalty = (7-s) + (7-w);
   return base + penalty;
 }
